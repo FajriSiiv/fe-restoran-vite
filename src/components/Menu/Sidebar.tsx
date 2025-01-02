@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useStore } from "../../lib/zustand/useStore";
 import ButtonBasic from "../Button/ButtonBasic";
 import { IoCart } from "react-icons/io5";
 import Swal from "sweetalert2";
 
 const Sidebar = () => {
+  const [pesanan, setPesanan] = useState<() => void>();
   const { transactions, addTransaction, updateTransaction, removeTransaction } =
     useStore();
 
@@ -26,6 +28,16 @@ const Sidebar = () => {
         removeTransaction(id);
       }
     });
+  };
+
+  const handleSentTransaction = () => {
+    setPesanan(() => ({
+      status: "belum diproses",
+      products: transactions.map((prod) => ({
+        id: prod.id,
+        quantity: prod.quantity,
+      })),
+    }));
   };
 
   return (
@@ -62,7 +74,7 @@ const Sidebar = () => {
       </div>
       <div className="h-[12vh] max-h-[200px]">
         <ButtonBasic
-          // onClick={() => decreaseQuantity(product.id)}
+          onClick={() => handleSentTransaction()}
           text={`Bayar $${total}`}
           className="w-full"
         />

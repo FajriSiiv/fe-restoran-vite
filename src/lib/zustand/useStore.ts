@@ -15,9 +15,15 @@ interface Store {
   ) => void;
   removeTransaction: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
+
+  loading: boolean;
+  setLoading: (state: any) => void;
 }
 
 export const useStore = create<Store>((set) => ({
+  loading: false,
+  setLoading: (state) => set({ loading: state }),
+
   transactions: [],
 
   addTransaction: (transaction: any) =>
