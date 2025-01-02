@@ -1,15 +1,57 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import ButtonBasic from "../components/Button/ButtonBasic";
-import { orders } from "../dummyData";
+
+import { io } from "socket.io-client";
+import { updateStatusOrder } from "../api/orders";
+import Swal from "sweetalert2";
+
+const socket = io("http://localhost:3000");
 
 const Orders = () => {
-  const handleConfirmOrders = () => {};
+  const [orders, setOrders] = useState([]);
 
   const filterOrders = orders.filter(
     (order) => order.status === "belum diproses"
   );
 
-  const handleOrderStatus = (id) => {};
+  const handleOrderStatus = async (id) => {
+    try {
+      const resultAlert = await Swal.fire({
+        title: `Ingin menyelesaikan Order #${id}?`,
+        showCancelButton: true,
+        confirmButtonText: "Ya",
+      });
+
+      if (resultAlert.isConfirmed) {
+        const data = await updateStatusOrder(id, "selesai");
+
+        Swal.fire("Berhasil menyelesaikan order!", "", "success");
+
+        setOrders((prevOrders) => {
+          return prevOrders.map((order) =>
+            order.id === id ? { ...order, status: "selesai" } : order
+          );
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    socket.on("orderLama", (data) => {
+      setOrders(data);
+    });
+
+    socket.on("newOrder", (order) => {
+      setOrders((prevOrders) => [...prevOrders, order]);
+    });
+
+    return () => {
+      socket.off("orderLama");
+      socket.off("newOrder");
+    };
+  }, []);
 
   return (
     <div className="w-full h-screen p-5">
@@ -17,8 +59,11 @@ const Orders = () => {
         Orders
       </h1>
       <div className="grid grid-cols-5 gap-5 mt-2">
-        {filterOrders.map((order) => (
-          <div className="bg-rose-100 min-h-32 p-2 rounded-sm flex flex-col justify-between ">
+        {filterOrders.map((order, index) => (
+          <div
+            key={index}
+            className="bg-rose-100 min-h-32 p-2 rounded-sm flex flex-col justify-between "
+          >
             <div className="w-full p-1 rounded-sm flex flex-col">
               <div>
                 <p className="font-semibold text-lg text-center">

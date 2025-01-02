@@ -20,6 +20,7 @@ const MainMenu = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [category, setCategory] = useState(categoryParams);
   const [page, setPage] = useState(paging);
+  const [limit, setLimit] = useState(10);
 
   const { loading, setLoading } = useStore();
 
@@ -27,16 +28,17 @@ const MainMenu = () => {
     setLoading(true);
 
     try {
-      const dataCategory = await getCategory();
+      // const dataCategory = await getCategory();
 
-      setCategories(dataCategory);
+      setCategories([]);
 
-      if (category) {
-        const data = await getProducts(category, page || paging);
+      // if (category) {
+      //   const data = await getProducts(category, page || paging);
 
-        setProducts(data.map((product) => ({ ...product, quantity: 1 })));
-        console.log(products, "dari  category");
-      } else if (page) {
+      //   setProducts(data.map((product) => ({ ...product, quantity: 1 })));
+      //   console.log(products, "dari  category");
+      // } else
+      if (page) {
         const data = await getProducts(category, page);
 
         setProducts(data.map((product) => ({ ...product, quantity: 1 })));
@@ -85,7 +87,7 @@ const MainMenu = () => {
   return (
     <>
       <div className="flex flex-wrap gap-2 mb-2">
-        <ButtonBasic
+        {/* <ButtonBasic
           text="All Product"
           className="py-1 hover:bg-orange-500"
           bgColor="bg-orange-400"
@@ -99,7 +101,7 @@ const MainMenu = () => {
             bgColor="bg-orange-400"
             onClick={() => handleCategory(cate.slug)}
           />
-        ))}
+        ))} */}
       </div>
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
         {products.map((product, index) => (
@@ -119,7 +121,7 @@ const MainMenu = () => {
         <ButtonBasic
           text="Next"
           onClick={handleNextPage}
-          disabled={products.length < 10}
+          disabled={products.length < 2}
         />
       </div>
     </>

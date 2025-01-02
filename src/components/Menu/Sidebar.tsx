@@ -1,21 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "../../lib/zustand/useStore";
 import ButtonBasic from "../Button/ButtonBasic";
 import { IoCart } from "react-icons/io5";
 import Swal from "sweetalert2";
+import useFormat from "../../hooks/useFormatRP";
+import { createOrder } from "../../api/orders";
 
 const Sidebar = () => {
-  const [pesanan, setPesanan] = useState<() => void>();
   const { transactions, addTransaction, updateTransaction, removeTransaction } =
     useStore();
 
-  const total = transactions
-    .reduce(
+  const total = useFormat(
+    transactions.reduce(
       (acc, currentValue) => acc + currentValue.price * currentValue.quantity,
       0
     )
-    .toFixed(2);
-
+  );
   const handleDeleteProductTransaction = (id) => {
     Swal.fire({
       title: "Ingin menghapus item ini?",
@@ -30,20 +30,38 @@ const Sidebar = () => {
     });
   };
 
-  const handleSentTransaction = () => {
-    setPesanan(() => ({
+  const handleSentTransaction = async () => {
+    await createOrder({
       status: "belum diproses",
       products: transactions.map((prod) => ({
-        id: prod.id,
+        id: prod.idProduct,
         quantity: prod.quantity,
       })),
-    }));
+    })
+      .then(() => {
+        Swal.fire({
+          title: "Berhasil membuat pesanan",
+          icon: "success",
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   return (
     <div className="flex flex-col gap-y-2 px-5 py-3  sticky top-5">
       <div className="flex flex-col gap-y-2 p-2 h-[85vh] overflow-y-scroll">
         {transactions.map((transaction, index) => {
+          const formatRP = (number) => {
+            return new Intl.NumberFormat("id-ID", {
+              style: "currency",
+              currency: "IDR",
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            }).format(number);
+          };
+
           const totalPerProduct = transaction.quantity * transaction.price;
 
           return (
@@ -55,7 +73,7 @@ const Sidebar = () => {
                 <p className="text-base leading-tight">
                   {transaction.title.slice(0, 30)}
                 </p>
-                <p className="font-bold text-xl">${totalPerProduct}</p>
+                <p className="font-bold text-lg">{formatRP(totalPerProduct)}</p>
               </div>
               <div className="flex gap-x-2 justify-between items-center">
                 <p>Quality : x{transaction.quantity}</p>
@@ -74,8 +92,8 @@ const Sidebar = () => {
       </div>
       <div className="h-[12vh] max-h-[200px]">
         <ButtonBasic
-          onClick={() => handleSentTransaction()}
-          text={`Bayar $${total}`}
+          onClick={handleSentTransaction}
+          text={`Bayar ${total}`}
           className="w-full"
         />
       </div>

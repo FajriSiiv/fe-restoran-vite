@@ -1,4 +1,4 @@
-import { useState } from "react";
+import useFormat from "../../hooks/useFormatRP";
 import { useStore } from "../../lib/zustand/useStore";
 import ButtonBasic from "../Button/ButtonBasic";
 import { IoCart } from "react-icons/io5";
@@ -40,7 +40,7 @@ const CardProductMenu = ({ product, setProducts }: any) => {
       const newTrasaction: any = {
         price: product.price,
         id: transactions.length + 1,
-        title: product.title,
+        title: product.name,
         quantity: product.quantity,
         idProduct: product.id,
       };
@@ -54,8 +54,8 @@ const CardProductMenu = ({ product, setProducts }: any) => {
       <div className="flex flex-col">
         <div className="relative w-full h-40 bg-white rounded-md"></div>
         <div className="  items-start mt-2 flex flex-col gap-y-2">
-          <p className="whitespace-wrap">{product.title.slice(0, 30)}</p>
-          <p className="font-bold text-xl">${product.price}</p>
+          <p className="whitespace-wrap">{product.name.slice(0, 30)}</p>
+          <p className="font-bold text-xl">{useFormat(product.price)}</p>
         </div>
       </div>
       <div className="flex flex-col">
